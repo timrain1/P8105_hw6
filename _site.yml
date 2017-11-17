@@ -1,0 +1,19 @@
+name: "p8105_hw6_jr3755_rz2375"
+output_dir: "."
+navbar:
+  title: "Home"
+  right:
+    - text: "Problem 1"
+      href: p8105_hw6_problem1.html
+    - text: "Problem 2"
+      href: https://timrain.shinyapps.io/p8105_hw6_jr3755/
+    - icon: fa-envelope-o fa-lg
+      href: mailto:<rz2375@cumc.columbia.edu>
+    - icon: fa-envelope fa-lg
+      href: mailto:<jr3755@cumc.columbia.edu>  
+    - icon: fa-github fa-lg
+      href: https://github.com/timrain1/p8105_hw6_jr3755_rz2375
+    - icon: fa-git fa-lg
+      href: https://github.com/RuiweiZhangColumbia/p8105_hw6.github.io
+output:
+  html_document

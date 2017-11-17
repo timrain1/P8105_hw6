@@ -1,0 +1,36 @@
+---
+title: "p8105_hw6_jr3755_rz2375"
+---
+
+## NYC Restaurant Inspection Data
+
+**The New York City Department of Health and Mental Hygiene (DOHMH) conducts unannounced restaurant inspections on an annual basis in order to check for compliance with policies on food handling, food temperature, personal hygiene of restaurant workers, and vermin control.**
+  
+**Regulation violations are each worth a pre-specified number of points, which are totaled at the end of the inspection. Scores are converted into grades, where a lower score earns a higher grade.** (*More details about the scoring and grading process can be found [here](http://www1.nyc.gov/assets/doh/downloads/pdf/rii/how-we-score-grade.pdf).*)
+
+## Processing steps
+
+**The dashboard for Problem 1 includes three charts, which are described as below. The dashboard can be found [here](). The Github repo can be found [here]().**
+
+### Barchart: Cuisine types
+
+We investigated all the restaurants in the dataset to see the distribution of different cuisine types in New York.
+
+First, we identified distinct restaurants in the dataset using the given unique identifier "camis", along with their corresponding cuisine descriptions. Then, we counted the number of restaurant for each cuisine type and plotted a bar chart with cuisine type on the X-axis and the number of restaurant on the Y-axis. 
+
+### Scatterplot: Score comparison (between 2016 and 2017) for Manhattan restaurants
+
+We selected restaurants in Manhattan with records in both 2016 and 2017 and did a comparison on their maximum annual scores between this year and last year. 
+
+First, we filtered the dataset to include only restaurants in Manhattan and their scores in 2016 and 2017. Then we summarized the maximum annual scores in 2016 and 2017 for each restaurant. Finally, we omitted the restaurants with missing data in either 2016 or 2017 or both and plotted a scatterplot with 2016 maximum annual score on the X-axis and 2017 maximum annual score on the Y-axis.
+
+### Boxplot: Scores and grades
+
+We performed a boxplot to investigate the relationship between grades and scores to see the distribution of scores within and between each grade category.
+
+We first omitted all the missing values for grade and then plotted a boxplot with grade on the X-axis and score in the Y-axis.
+
+## Shiny 
+
+**We included three widgets in Problem 2, one slider inputs widget on variable "score", one select inputs widget on variable "grade" and one drop-down menus on variable "boro". The  shiny-enabled dashboard for Problem 2 can be found [here](https://timrain.shinyapps.io/p8105_hw6_jr3755/). The Github repo can be found [here]().** 
+
