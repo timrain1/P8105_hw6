@@ -1,0 +1,129 @@
+---
+title: "NYC Restaurant Inspections exploratory plot by Junting Ren and Ruiwei Zhang"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(flexdashboard)
+library(tidyverse)
+library(janitor)
+library(stringr)
+library(forcats)
+library(viridis)
+library(plotly)
+library(shiny)
+library(tidyverse)
+library(httr)
+library(jsonlite)
+library(tidytext)
+library(ggplot2)
+get_all_inspections = function(url) {
+  
+  all_inspections = vector("list", length = 0)
+  
+  loop_index = 1
+  chunk_size = 50000
+  DO_NEXT = TRUE
+  
+  while (DO_NEXT) {
+    message("Getting data, page ", loop_index)
+    
+    all_inspections[[loop_index]] = 
+      GET(url,
+          query = list(`$order` = "zipcode",
+                       `$limit` = chunk_size,
+                       `$offset` = as.integer((loop_index - 1) * chunk_size)
+                       )
+          ) %>%
+      content("text") %>%
+      fromJSON() %>%
+      as_tibble()
+    
+    DO_NEXT = dim(all_inspections[[loop_index]])[1] == chunk_size
+    loop_index = loop_index + 1
+  }
+  
+  all_inspections
+  
+}
+
+url = "https://data.cityofnewyork.us/resource/9w7m-hzhe.json"
+
+nyc_inspections = get_all_inspections(url) %>%
+  bind_rows() 
+```
+ 
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Barchart: Cuisine types
+
+```{r}
+  ggplotly(nyc_inspections %>%
+  distinct(camis, cuisine_description) %>%
+  count(cuisine_description) %>% 
+  filter(n > 100) %>% 
+  mutate(cuisine_description = fct_reorder(cuisine_description, n)) %>% 
+  ggplot(aes(x = cuisine_description, y = n, color = cuisine_description)) + 
+    geom_col() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), legend.position = "none") +
+    labs(title = "Barchart for the number of different type of restaurants",
+       x = "Restaurant type", y = "Count"))
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Scatterplot: Score comparison (between 2016 and 2017) for Manhattan restaurants 
+
+```{r 2}
+nyc_inspections_maxannualscore = 
+  nyc_inspections %>%
+  filter(!is.na(score)) %>%
+  filter(boro == "MANHATTAN") %>%
+  separate(grade_date, into = c("grade_year", "grade_month", "grade_day"), sep = "-") %>%
+  select(camis, grade_year, score) %>%
+  distinct(camis, grade_year, score) %>%
+  filter(grade_year %in% c("2016", "2017")) %>%
+  group_by(camis, grade_year) %>%
+  mutate(max_score = max(score)) %>%
+  select(camis, grade_year, max_score) %>%
+  distinct(camis, grade_year, max_score) %>%
+  ungroup() %>%
+  mutate(grade_year = replace(grade_year, grade_year == "2016", "last_year"),
+         grade_year = replace(grade_year, grade_year == "2017", "this_year"),
+         max_score = as.numeric(max_score)) %>%
+  spread(key = grade_year, value = max_score) %>%
+  na.omit()
+
+nyc_inspections_namencamis = 
+  nyc_inspections %>%
+  distinct(camis, dba)
+  
+nyc_inspections_annualscore = 
+  left_join(nyc_inspections_maxannualscore, nyc_inspections_namencamis, key = "camis") %>%
+  rename(restaurant_name = dba)
+
+nyc_inspections_annualscore %>%
+  mutate(text_label = str_c("Restaurant name: ", restaurant_name)) %>% 
+  plot_ly(x = ~last_year, y = ~this_year, type = "scatter", mode = "markers",
+          alpha = 0.5, sizes = 0.05, text = ~text_label)
+```
+
+### Boxplot: Scores and grades
+
+```{r}
+  ggplotly(nyc_inspections %>% 
+  filter(!is.na(grade)) %>%
+  mutate(grade = as.factor(grade),
+         score = as.numeric(score)) %>% 
+  ggplot(aes(x = grade, y = score, color = grade)) + 
+  geom_boxplot() +
+  labs(title = "Boxplot for inspection scores of different grades from inspections",
+       y = "Inspection score", x = "Inspection grade"))
+```
